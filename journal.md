@@ -13,3 +13,8 @@
     - *The data space is quite complex and has a lot of curvature due to the additional chroma noise. NN would be a great approximator.*
 - **BERT would be a good choice**
     - *Encoder model would fit into the noise produced by the unwanted notes quite well.*
+
+
+## During testing
+- **Accuracy reduces if the sigmoid in the output layer**
+    - *Data is linearly separable*
