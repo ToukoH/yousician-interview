@@ -82,4 +82,4 @@ for inputs, labels in test_loader:
     correct += (predicted == labels.long()).sum().item()
 
 accuracy = 100 * correct / total
-print(f"Accuracy: {accuracy}%")
+print(f"Accuracy: {accuracy:.1f}%")
