@@ -12,7 +12,7 @@ column_names = [
 
 df.columns = column_names
 
-output_file = "data/labeled_music_data.csv"
+output_file = "data/labeled_chord_data.csv"
 df.to_csv(output_file, index=False)
 
 output_file
