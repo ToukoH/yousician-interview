@@ -5,9 +5,9 @@ data_file_path = "data/chord_data.csv"
 df = pd.read_csv(data_file_path, header=None)
 
 column_names = [
-    "Chord Root Note", "Chord Type",
-    "Chroma A", "Chroma A#", "Chroma B", "Chroma C", "Chroma C#", "Chroma D", 
-    "Chroma D#", "Chroma E", "Chroma F", "Chroma F#", "Chroma G", "Chroma G#"
+    "chord_root_note", "chord_type",
+    "Chroma_A", "Chroma_A#", "Chroma_B", "Chroma_C", "Chroma_C#", "Chroma_D", 
+    "Chroma_D#", "Chroma_E", "Chroma_F", "Chroma_F#", "Chroma_G", "Chroma_G#"
 ]
 
 df.columns = column_names

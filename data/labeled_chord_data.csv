@@ -1,4 +1,4 @@
-Chord Root Note,Chord Type,Chroma A,Chroma A#,Chroma B,Chroma C,Chroma C#,Chroma D,Chroma D#,Chroma E,Chroma F,Chroma F#,Chroma G,Chroma G#
+chord_root_note,chord_type,Chroma_A,Chroma_A#,Chroma_B,Chroma_C,Chroma_C#,Chroma_D,Chroma_D#,Chroma_E,Chroma_F,Chroma_F#,Chroma_G,Chroma_G#
 1,0,0.1,1.65,0.0177,1.25,0.00512,1.03,0.222,0.0274,2.31,0.0441,1.08,0.0391
 11,0,0.0,1.13,0.0936,2.22,0.00807,0.233,1.83,0.00214,0.574,0.000218,0.577,1.52
 1,0,0.0,2.24,0.08,0.967,0.000312,1.44,0.375,0.00255,1.2,0.0248,1.38,0.156
