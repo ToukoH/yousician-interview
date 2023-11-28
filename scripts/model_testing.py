@@ -6,14 +6,18 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
+layer_size = 256
+target_class_size = 24
+input_size = 13
+
 data = "data/labeled_chord_data.csv"
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super(NeuralNetwork, self).__init__()
-        self.l1 = nn.Linear(13, 64)
-        self.l2 = nn.Linear(64, 24)
-        self.l3 = nn.Linear(24, 1)
+        self.l1 = nn.Linear(input_size, layer_size)
+        self.l2 = nn.Linear(layer_size, target_class_size)
+        self.l3 = nn.Linear(target_class_size, 1)
         self.relu = nn.ReLU()
 
     def forward(self, x):
