@@ -26,8 +26,8 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super(NeuralNetwork, self).__init__()
         self.l1 = nn.Linear(input_dim, inner_dim)
-        self.l2 = nn.Linear(inner_dim, target_class_dim)
-        self.l3 = nn.Linear(target_class_dim, 1)
+        self.l2 = nn.Linear(inner_dim, inner_dim)
+        self.l3 = nn.Linear(inner_dim, target_class_dim)
         self.relu = nn.ReLU()
 
     def forward(self, x):
@@ -39,21 +39,22 @@ class NeuralNetwork(nn.Module):
 df = pd.read_csv(data)
 X = df.drop("chord_type", axis=1)
 y = df["chord_type"]
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=314)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-train_data = TensorDataset(torch.FloatTensor(X_train), torch.FloatTensor(y_train.values))
+train_data = TensorDataset(torch.FloatTensor(X_train), torch.LongTensor(y_train.values))
 train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
 
-test_data = TensorDataset(torch.FloatTensor(X_test), torch.FloatTensor(y_test.values))
+test_data = TensorDataset(torch.FloatTensor(X_test), torch.LongTensor(y_test.values))
 test_loader = DataLoader(test_data, batch_size=32, shuffle=False)
+
 
 model = NeuralNetwork().to(device)
 optimizer = Adam(model.parameters(), lr=learning_rate)
-criterion = nn.BCEWithLogitsLoss()
+criterion = nn.CrossEntropyLoss()
 
 for epoch in range(num_epochs):
     model.train()
@@ -75,11 +76,16 @@ correct = 0
 total = len(y_test)
 
 for inputs, labels in test_loader:
-    inputs, labels = inputs.to(device), labels.to(device)
-    outputs = model(inputs).squeeze()
-    predicted = (outputs > 0.5).long()
-    
-    correct += (predicted == labels.long()).sum().item()
+    inputs = inputs.to(device)
+    labels = labels.to(device)
+    outputs = model(inputs)
+    _, predicted = torch.max(outputs, 1)
+    correct_predictions = (predicted == labels)
+
+    batch_correct = correct_predictions.sum()
+    correct_predictions = batch_correct.item()
+
+    correct += correct_predictions
 
 accuracy = 100 * correct / total
 print(f"Accuracy: {accuracy:.1f}%")
