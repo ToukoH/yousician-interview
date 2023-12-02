@@ -1,3 +1,6 @@
+# Yousician Interview Assignment
+# Touko Haapanen 2.12.2023
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -27,8 +30,8 @@ data = pd.read_csv(data)
 X = data.drop(["combined_label"], axis=1).values
 y = data["combined_label"].values
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=314)
-X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5, random_state=314)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+X_val, X_test, y_val, y_test = train_test_split(X_test, y_test, test_size=0.5)
 
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
@@ -66,56 +69,89 @@ model = NeuralNetwork().to(device)
 optimizer = Adam(model.parameters(), lr=learning_rate)
 criterion = nn.CrossEntropyLoss()
 
+# VALIDATION FUNCTION, USED IN TRAINING LOOP
 def validate(model, val_loader, criterion):
     model.eval()
     val_loss = 0
-    correct = 0
+    total_correct_predictions = 0
+
     with torch.no_grad():
-        for X, y in val_loader:
-            output = model(X)
-            val_loss += criterion(output, y).item()
-            pred = output.argmax(dim=1, keepdim=True)
-            correct += pred.eq(y.view_as(pred)).sum().item()
+        for inputs, labels in val_loader:
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            
+            outputs = model(inputs)
+            val_loss += criterion(outputs, labels).item()
+            
+            _, predicted = torch.max(outputs, 1)
+            correct_predictions = (predicted == labels)
+
+            correct_in_batch = correct_predictions.sum()
+
+            total_correct_predictions += correct_in_batch
 
     val_loss /= len(val_loader.dataset)
-    accuracy = 100. * correct / len(val_loader.dataset)
-    print(f'Validation set: Average loss: {val_loss:.4f}, Accuracy: {correct}/{len(val_loader.dataset)} ({accuracy:.0f}%)')
+    val_accuracy = 100 * (total_correct_predictions / len(val_loader.dataset))
 
-print("Executing training")
-print("_________________________________________")
-for epoch in range(training_epochs):
-    model.train()
-    for batch_idx, (X, y) in enumerate(train_loader):
-        optimizer.zero_grad()
-        output = model(X)
-        loss = criterion(output, y)
-        loss.backward()
-        optimizer.step()
-        
-        if batch_idx % 10 == 0:
-            print(f'Train Epoch: {epoch + 1} [{batch_idx * len(X)}/{len(train_loader.dataset)} ({100. * batch_idx / len(train_loader):.0f}%)]\tLoss: {loss.item():.6f}')
+    file.write(f"Validation: Average loss: {val_loss:.4f}, Accuracy: {val_accuracy:.1f}%\n")
+    print(f"Validation: Average loss: {val_loss:.4f}, Accuracy: {val_accuracy:.1f}%")
+    
 
-    validate(model, val_loader, criterion)
+# TRAINING LOOP
+with open("output.txt", "w") as file:
+    file.write("Executing training\n")
+    file.write("_________________________________________\n")
 
-torch.save(model.state_dict(), 'model.pth')
+    for epoch in range(training_epochs):
+        print(f"Starting epoch {epoch + 1}")
+        file.write((f"Starting epoch {epoch + 1}\n"))
+        model.train()
 
-model.load_state_dict(torch.load("model.pth"))
-model.eval()
+        for batch_idx, (inputs, labels) in enumerate(train_loader):
+            inputs = inputs.to(device)
+            labels = labels.to(device)
 
-correct = 0
-total = len(y_test)
+            output = model(inputs)
+            loss = criterion(output, labels)
 
-for inputs, labels in test_loader:
-    inputs = inputs.to(device)
-    labels = labels.to(device)
-    outputs = model(inputs)
-    _, predicted = torch.max(outputs, 1)
-    correct_predictions = (predicted == labels)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            
+            if batch_idx % 10 == 0:
+                file.write(f"Training Epoch {epoch + 1}: [{100 * batch_idx / len(train_loader):.0f}%   Loss: {loss.item():.6f}]\n")
+                print(f"Training Epoch {epoch + 1}: [{100 * batch_idx / len(train_loader):.0f}%   Loss: {loss.item():.6f}]")
 
-    batch_correct = correct_predictions.sum()
-    correct_predictions = batch_correct.item()
+        print(f"Training epoch {epoch + 1} finished")
+        validate(model, val_loader, criterion)
 
-    correct += correct_predictions
+        file.write(f"Training epoch {epoch + 1} finished!\n")
+        file.write("_________________________________________\n")
+        file.write("")
 
-accuracy = 100 * correct / total
-print(f"Accuracy: {accuracy:.1f}%")
+    torch.save(model.state_dict(), 'model.pth')
+
+# TESTING PHASE
+    model.load_state_dict(torch.load("model.pth"))
+    model.eval()
+
+    total_correct_predictions = 0
+    labels_total = len(y_test)
+
+    for inputs, labels in test_loader:
+        inputs = inputs.to(device)
+        labels = labels.to(device)
+
+        outputs = model(inputs)
+        _, predicted = torch.max(outputs, 1)
+        correct_predictions = (predicted == labels)
+
+        correct_in_batch = correct_predictions.sum()
+
+        total_correct_predictions += correct_in_batch
+
+    accuracy = 100 * total_correct_predictions / labels_total
+
+    print(f"Testing accuracy: {accuracy:.1f}%")
+    file.write("\n")
+    file.write(f"Testing accuracy: {accuracy:.1f}%\n")
