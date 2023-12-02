@@ -12,10 +12,9 @@ df.columns = column_names
 
 df['combined_label'] = df['chord_root_note'] * 2 + df['chord_type']
 
-#Optional
 df.drop(['chord_root_note', 'chord_type'], axis=1, inplace=True)
 
-output_file = "data/labeled_chord_data.csv"
+output_file = "data/combined_label_chord_data.csv"
 df.to_csv(output_file, index=False)
 
 output_file
