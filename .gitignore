@@ -1,3 +1,5 @@
 venv/
 nbs/model.pth
 model.pth
+.DS_store
+.data/
