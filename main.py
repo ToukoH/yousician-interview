@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, TensorDataset
 # HYPERPARAMETERS
 learning_rate = 0.001
 inner_dim = 256
-training_epochs = 10
+training_epochs = 9
 target_class_dim = 24
 input_dim = 12
 batch_size = 32
